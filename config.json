@@ -1,0 +1,60 @@
+{
+    "pozisyonlar": [
+        "soguk-sef",
+        "sicak-sef",
+        "pastaci",
+        "asci",
+        "mutfak-sefi",
+        "garson",
+        "barmen",
+        "resepsiyon"
+    ],
+    "sehirler": [
+        "antalya",
+        "istanbul",
+        "izmir",
+        "ankara",
+        "mugla",
+        "bodrum"
+    ],
+    "kaynaklar": [
+        {
+            "ad": "isbul.net",
+            "url_sablonu": "https://www.isbul.net/is-ilanlari/{sehir}?aranan={pozisyon}",
+            "aktif": true,
+            "seciciler": {
+                "ilan_kutusu": "div.job-card",
+                "baslik": "h2",
+                "sirket": "div.company",
+                "konum": "span.location",
+                "link": "a"
+            }
+        },
+        {
+            "ad": "kariyer.net",
+            "url_sablonu": "https://www.kariyer.net/is-ilanlari?arama={pozisyon}&sehir={sehir}",
+            "aktif": true,
+            "seciciler": {
+                "ilan_kutusu": "div.job-list-item",
+                "baslik": "h2.title",
+                "sirket": "span.company",
+                "konum": "span.location",
+                "link": "a"
+            }
+        },
+        {
+            "ad": "indeed.com.tr",
+            "url_sablonu": "https://tr.indeed.com/jobs?q={pozisyon}&l={sehir}",
+            "aktif": false,
+            "seciciler": {
+                "ilan_kutusu": "div.job_seen_beacon",
+                "baslik": "h2.jobTitle",
+                "sirket": "span.companyName",
+                "konum": "div.companyLocation",
+                "link": "a"
+            }
+        }
+    ],
+    "secili_pozisyon": "soguk-sef",
+    "secili_sehir": "antalya"
+}
