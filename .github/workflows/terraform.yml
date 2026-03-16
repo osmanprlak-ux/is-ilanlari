@@ -5,12 +5,17 @@ on:
     - cron: '0 5 * * *' # Her sabah Türkiye saati ile 08:00'de çalışır
   workflow_dispatch: # İstediğimiz zaman manuel çalıştırmamızı sağlar
 
+permissions:
+  contents: write
+
 jobs:
   scrape-and-update:
     runs-on: ubuntu-latest
     steps:
       - name: Dosyalari Al
         uses: actions/checkout@v3
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Python Kurulumu
         uses: actions/setup-python@v4
