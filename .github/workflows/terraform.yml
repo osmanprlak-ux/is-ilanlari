@@ -14,8 +14,6 @@ jobs:
     steps:
       - name: Dosyalari Al
         uses: actions/checkout@v4
-        with:
-          persist-credentials: true
 
       - name: Python Kurulumu
         uses: actions/setup-python@v5
@@ -29,9 +27,12 @@ jobs:
         run: python scraper.py
 
       - name: Yeni Ilanlari Kaydet
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git remote set-url origin https://x-access-token:${GITHUB_TOKEN}@github.com/${{ github.repository }}.git
           git add ilanlar.json
           git diff --staged --quiet && echo "Degisiklik yok" && exit 0
           git commit -m "Otomatik Guncelleme: Yeni ilanlar eklendi"
