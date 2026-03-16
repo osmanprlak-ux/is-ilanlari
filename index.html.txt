@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Güncel İş İlanları</title>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f4f6f9; margin: 0; padding: 0; color: #333; }
+        header { background-color: #2c3e50; color: white; padding: 20px; text-align: center; box-shadow: 0 4px 6px rgba(0,0,0,0.1); position: sticky; top: 0; z-index: 100; }
+        header h1 { margin: 0; font-size: 22px; }
+        header p { margin: 5px 0 0 0; font-size: 14px; color: #bdc3c7; }
+        .container { padding: 20px; max-width: 600px; margin: 0 auto; }
+        .ilan-karti { background: white; border-radius: 12px; padding: 16px; margin-bottom: 16px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); border-left: 5px solid #3498db; }
+        .ilan-baslik { font-size: 18px; font-weight: bold; color: #2c3e50; margin: 0 0 8px 0; }
+        .sirket-isim { font-size: 14px; color: #7f8c8d; margin-bottom: 12px; display: flex; align-items: center; gap: 5px; }
+        .detaylar { display: flex; justify-content: space-between; align-items: center; font-size: 13px; }
+        .etiket { background-color: #e8f4f8; color: #2980b9; padding: 4px 8px; border-radius: 6px; font-weight: 600; }
+        .tarih { color: #e74c3c; font-weight: bold; font-size: 12px; }
+        .link-buton { display: block; text-align: center; background-color: #3498db; color: white; text-decoration: none; padding: 10px; border-radius: 8px; margin-top: 12px; font-weight: bold; }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>Antalya Mutfak İlanları</h1>
+        <p id="son-guncelleme">En güncel ilanlar aranıyor...</p>
+    </header>
+
+    <div class="container" id="ilan-konteyner">
+        <p style='text-align:center;'>Şu an güncel ilanlar yükleniyor...</p>
+    </div>
+
+    <script>
+        // Python'un oluşturacağı 'ilanlar.json' dosyasını arayıp bulma komutu
+        fetch('ilanlar.json')
+            .then(cevap => cevap.json())
+            .then(veri => {
+                ilanlariGoster(veri); // Veri gelince ekranı çizmeye başla
+            })
+            .catch(hata => {
+                console.error("Hata:", hata);
+                document.getElementById('ilan-konteyner').innerHTML = 
+                    "<p style='text-align:center;'>Henüz yeni ilan bulunamadı veya taranıyor...</p>";
+            });
+
+        // Gelen gerçek verileri kutucuklara yerleştirme işlemi
+        function ilanlariGoster(ilanListesi) {
+            const konteyner = document.getElementById('ilan-konteyner');
+            konteyner.innerHTML = ''; 
+            
+            // Tarihe göre sırala (En yeni en üstte)
+            ilanListesi.sort((a, b) => new Date(b.tarih) - new Date(a.tarih));
+
+            ilanListesi.forEach(ilan => {
+                const kart = `
+                    <div class="ilan-karti">
+                        <h2 class="ilan-baslik">${ilan.baslik}</h2>
+                        <div class="sirket-isim">🏢 ${ilan.sirket} - 📍 ${ilan.konum}</div>
+                        <div class="detaylar">
+                            <span class="etiket">Güncel İlan</span>
+                            <span class="tarih">🕒 ${ilan.tarih}</span>
+                        </div>
+                        <a href="${ilan.link}" target="_blank" class="link-buton">İlan Detayına Git</a>
+                    </div>
+                `;
+                konteyner.innerHTML += kart;
+            });
+
+            const simdi = new Date();
+            document.getElementById('son-guncelleme').innerText = 
+                "Son Güncelleme: " + simdi.toLocaleTimeString('tr-TR', {hour: '2-digit', minute:'2-digit'});
+        }
+    </script>
+</body>
+</html>
