@@ -5,70 +5,271 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Güncel İş İlanları</title>
     <style>
+        * { box-sizing: border-box; }
         body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f4f6f9; margin: 0; padding: 0; color: #333; }
         header { background-color: #2c3e50; color: white; padding: 20px; text-align: center; box-shadow: 0 4px 6px rgba(0,0,0,0.1); position: sticky; top: 0; z-index: 100; }
         header h1 { margin: 0; font-size: 22px; }
         header p { margin: 5px 0 0 0; font-size: 14px; color: #bdc3c7; }
+
+        .filtreler {
+            background: #34495e;
+            padding: 15px 20px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            justify-content: center;
+            align-items: center;
+        }
+        .filtre-grup {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+        .filtre-grup label {
+            color: #bdc3c7;
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .filtre-grup select {
+            padding: 8px 12px;
+            border-radius: 6px;
+            border: 1px solid #5d6d7e;
+            background: #2c3e50;
+            color: white;
+            font-size: 14px;
+            min-width: 160px;
+            cursor: pointer;
+        }
+        .filtre-grup select:focus {
+            outline: none;
+            border-color: #3498db;
+        }
+        .kaynak-konteyner {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+        .kaynak-etiket {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            background: #2c3e50;
+            padding: 6px 10px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 13px;
+            color: #bdc3c7;
+            border: 1px solid #5d6d7e;
+            transition: all 0.2s;
+        }
+        .kaynak-etiket.aktif {
+            background: #2980b9;
+            color: white;
+            border-color: #3498db;
+        }
+        .kaynak-etiket input { display: none; }
+        .filtre-btn {
+            padding: 8px 20px;
+            background: #3498db;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: bold;
+            cursor: pointer;
+            align-self: flex-end;
+            transition: background 0.2s;
+        }
+        .filtre-btn:hover { background: #2980b9; }
+
         .container { padding: 20px; max-width: 600px; margin: 0 auto; }
+        .sonuc-bilgi {
+            text-align: center;
+            color: #7f8c8d;
+            font-size: 13px;
+            margin-bottom: 15px;
+            padding: 8px;
+            background: white;
+            border-radius: 8px;
+        }
         .ilan-karti { background: white; border-radius: 12px; padding: 16px; margin-bottom: 16px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); border-left: 5px solid #3498db; }
         .ilan-baslik { font-size: 18px; font-weight: bold; color: #2c3e50; margin: 0 0 8px 0; }
         .sirket-isim { font-size: 14px; color: #7f8c8d; margin-bottom: 12px; display: flex; align-items: center; gap: 5px; }
-        .detaylar { display: flex; justify-content: space-between; align-items: center; font-size: 13px; }
+        .detaylar { display: flex; justify-content: space-between; align-items: center; font-size: 13px; flex-wrap: wrap; gap: 6px; }
         .etiket { background-color: #e8f4f8; color: #2980b9; padding: 4px 8px; border-radius: 6px; font-weight: 600; }
+        .kaynak-badge { background-color: #eafaf1; color: #27ae60; padding: 4px 8px; border-radius: 6px; font-weight: 600; font-size: 11px; }
         .tarih { color: #e74c3c; font-weight: bold; font-size: 12px; }
-        .link-buton { display: block; text-align: center; background-color: #3498db; color: white; text-decoration: none; padding: 10px; border-radius: 8px; margin-top: 12px; font-weight: bold; }
+        .link-buton { display: block; text-align: center; background-color: #3498db; color: white; text-decoration: none; padding: 10px; border-radius: 8px; margin-top: 12px; font-weight: bold; transition: background 0.2s; }
+        .link-buton:hover { background-color: #2980b9; }
+
+        @media (max-width: 480px) {
+            .filtreler { flex-direction: column; align-items: stretch; }
+            .filtre-grup select { min-width: auto; width: 100%; }
+        }
     </style>
 </head>
 <body>
 
     <header>
-        <h1>Antalya Mutfak İlanları</h1>
-        <p id="son-guncelleme">En güncel ilanlar aranıyor...</p>
+        <h1>Guncel Is Ilanlari</h1>
+        <p id="son-guncelleme">En guncel ilanlar araniyor...</p>
     </header>
 
+    <div class="filtreler" id="filtre-alani">
+        <p style="color: #bdc3c7; text-align: center; width: 100%;">Filtreler yukleniyor...</p>
+    </div>
+
     <div class="container" id="ilan-konteyner">
-        <p style='text-align:center;'>Şu an güncel ilanlar yükleniyor...</p>
+        <p style="text-align:center;">Su an guncel ilanlar yukleniyor...</p>
     </div>
 
     <script>
-        // Python'un oluşturacağı 'ilanlar.json' dosyasını arayıp bulma komutu
-        fetch('ilanlar.json')
-            .then(cevap => cevap.json())
-            .then(veri => {
-                ilanlariGoster(veri); // Veri gelince ekranı çizmeye başla
-            })
-            .catch(hata => {
-                console.error("Hata:", hata);
-                document.getElementById('ilan-konteyner').innerHTML = 
-                    "<p style='text-align:center;'>Henüz yeni ilan bulunamadı veya taranıyor...</p>";
+        let tumIlanlar = [];
+        let konfig = null;
+
+        // Konfig ve ilanları paralel yükle
+        Promise.all([
+            fetch('config.json').then(c => c.json()),
+            fetch('ilanlar.json').then(c => c.json())
+        ])
+        .then(([konf, ilanlar]) => {
+            konfig = konf;
+            tumIlanlar = ilanlar;
+            filtreleriOlustur(konf);
+            ilanlariGoster(ilanlar);
+        })
+        .catch(hata => {
+            console.error("Hata:", hata);
+            document.getElementById('ilan-konteyner').innerHTML =
+                "<p style='text-align:center;'>Henuz yeni ilan bulunamadi veya taraniyor...</p>";
+        });
+
+        function filtreleriOlustur(konf) {
+            const alan = document.getElementById('filtre-alani');
+
+            // Pozisyon seçici
+            let pozOpsHtml = '';
+            konf.pozisyonlar.forEach(p => {
+                const secili = p === konf.secili_pozisyon ? 'selected' : '';
+                const gorunen = p.replace(/-/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
+                pozOpsHtml += '<option value="' + p + '" ' + secili + '>' + gorunen + '</option>';
             });
 
-        // Gelen gerçek verileri kutucuklara yerleştirme işlemi
+            // Şehir seçici
+            let sehirOpsHtml = '';
+            konf.sehirler.forEach(s => {
+                const secili = s === konf.secili_sehir ? 'selected' : '';
+                const gorunen = s.replace(/\b\w/g, c => c.toUpperCase());
+                sehirOpsHtml += '<option value="' + s + '" ' + secili + '>' + gorunen + '</option>';
+            });
+
+            // Kaynak checkbox'ları
+            let kaynakHtml = '';
+            konf.kaynaklar.forEach(k => {
+                const aktifClass = k.aktif ? 'aktif' : '';
+                const checked = k.aktif ? 'checked' : '';
+                kaynakHtml += '<label class="kaynak-etiket ' + aktifClass + '">' +
+                    '<input type="checkbox" value="' + k.ad + '" ' + checked + ' onchange="kaynakDegistir(this)">' +
+                    k.ad + '</label>';
+            });
+
+            alan.innerHTML =
+                '<div class="filtre-grup">' +
+                    '<label>Pozisyon</label>' +
+                    '<select id="pozisyon-sec">' + pozOpsHtml + '</select>' +
+                '</div>' +
+                '<div class="filtre-grup">' +
+                    '<label>Sehir</label>' +
+                    '<select id="sehir-sec">' + sehirOpsHtml + '</select>' +
+                '</div>' +
+                '<div class="filtre-grup">' +
+                    '<label>Kaynaklar</label>' +
+                    '<div class="kaynak-konteyner">' + kaynakHtml + '</div>' +
+                '</div>' +
+                '<button class="filtre-btn" onclick="filtreUygula()">Filtrele</button>';
+        }
+
+        function kaynakDegistir(checkbox) {
+            const etiket = checkbox.parentElement;
+            if (checkbox.checked) {
+                etiket.classList.add('aktif');
+            } else {
+                etiket.classList.remove('aktif');
+            }
+        }
+
+        function filtreUygula() {
+            // Seçili kaynakları al
+            const seciliKaynaklar = [];
+            document.querySelectorAll('.kaynak-etiket input:checked').forEach(cb => {
+                seciliKaynaklar.push(cb.value);
+            });
+
+            // İlanları filtrele (kaynak bazlı)
+            let filtrelenmis = tumIlanlar;
+            if (seciliKaynaklar.length > 0) {
+                filtrelenmis = tumIlanlar.filter(ilan =>
+                    seciliKaynaklar.includes(ilan.kaynak) || !ilan.kaynak
+                );
+            }
+
+            ilanlariGoster(filtrelenmis);
+
+            // Bilgi mesajı
+            const pozisyon = document.getElementById('pozisyon-sec').value;
+            const sehir = document.getElementById('sehir-sec').value;
+            console.log('Filtre: pozisyon=' + pozisyon + ', sehir=' + sehir + ', kaynaklar=' + seciliKaynaklar.join(','));
+        }
+
         function ilanlariGoster(ilanListesi) {
             const konteyner = document.getElementById('ilan-konteyner');
-            konteyner.innerHTML = ''; 
-            
+            konteyner.innerHTML = '';
+
+            if (!ilanListesi || ilanListesi.length === 0) {
+                konteyner.innerHTML = "<p style='text-align:center;'>Secilen filtrelere uygun ilan bulunamadi.</p>";
+                return;
+            }
+
             // Tarihe göre sırala (En yeni en üstte)
             ilanListesi.sort((a, b) => new Date(b.tarih) - new Date(a.tarih));
 
+            // Sonuç bilgisi
+            const bilgi = document.createElement('div');
+            bilgi.className = 'sonuc-bilgi';
+            bilgi.textContent = 'Toplam ' + ilanListesi.length + ' ilan bulundu';
+            konteyner.appendChild(bilgi);
+
             ilanListesi.forEach(ilan => {
-                const kart = `
-                    <div class="ilan-karti">
-                        <h2 class="ilan-baslik">${ilan.baslik}</h2>
-                        <div class="sirket-isim">🏢 ${ilan.sirket} - 📍 ${ilan.konum}</div>
-                        <div class="detaylar">
-                            <span class="etiket">Güncel İlan</span>
-                            <span class="tarih">🕒 ${ilan.tarih}</span>
-                        </div>
-                        <a href="${ilan.link}" target="_blank" class="link-buton">İlan Detayına Git</a>
-                    </div>
-                `;
-                konteyner.innerHTML += kart;
+                const kart = document.createElement('div');
+                kart.className = 'ilan-karti';
+
+                const kaynakBadge = ilan.kaynak ? '<span class="kaynak-badge">' + ilan.kaynak + '</span>' : '';
+
+                kart.innerHTML =
+                    '<h2 class="ilan-baslik">' + escapeHtml(ilan.baslik) + '</h2>' +
+                    '<div class="sirket-isim">' + escapeHtml(ilan.sirket) + ' - ' + escapeHtml(ilan.konum) + '</div>' +
+                    '<div class="detaylar">' +
+                        '<span class="etiket">Guncel Ilan</span>' +
+                        kaynakBadge +
+                        '<span class="tarih">' + escapeHtml(ilan.tarih) + '</span>' +
+                    '</div>' +
+                    '<a href="' + escapeHtml(ilan.link) + '" target="_blank" rel="noopener noreferrer" class="link-buton">Ilan Detayina Git</a>';
+
+                konteyner.appendChild(kart);
             });
 
             const simdi = new Date();
-            document.getElementById('son-guncelleme').innerText = 
-                "Son Güncelleme: " + simdi.toLocaleTimeString('tr-TR', {hour: '2-digit', minute:'2-digit'});
+            document.getElementById('son-guncelleme').innerText =
+                "Son Guncelleme: " + simdi.toLocaleTimeString('tr-TR', {hour: '2-digit', minute:'2-digit'});
+        }
+
+        // XSS koruması için HTML escape
+        function escapeHtml(metin) {
+            if (!metin) return '';
+            const div = document.createElement('div');
+            div.textContent = metin;
+            return div.innerHTML;
         }
     </script>
 </body>
