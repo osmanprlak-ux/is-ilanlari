@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Güncel İş İlanları</title>
+    <title>Guncel Is Ilanlari</title>
     <style>
         * { box-sizing: border-box; }
         body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f4f6f9; margin: 0; padding: 0; color: #333; }
@@ -18,7 +18,7 @@
             flex-wrap: wrap;
             gap: 10px;
             justify-content: center;
-            align-items: center;
+            align-items: flex-end;
         }
         .filtre-grup {
             display: flex;
@@ -31,7 +31,8 @@
             text-transform: uppercase;
             letter-spacing: 0.5px;
         }
-        .filtre-grup select {
+        .filtre-grup select,
+        .filtre-grup input {
             padding: 8px 12px;
             border-radius: 6px;
             border: 1px solid #5d6d7e;
@@ -41,34 +42,12 @@
             min-width: 160px;
             cursor: pointer;
         }
-        .filtre-grup select:focus {
+        .filtre-grup select:focus,
+        .filtre-grup input:focus {
             outline: none;
             border-color: #3498db;
         }
-        .kaynak-konteyner {
-            display: flex;
-            gap: 8px;
-            flex-wrap: wrap;
-        }
-        .kaynak-etiket {
-            display: flex;
-            align-items: center;
-            gap: 4px;
-            background: #2c3e50;
-            padding: 6px 10px;
-            border-radius: 6px;
-            cursor: pointer;
-            font-size: 13px;
-            color: #bdc3c7;
-            border: 1px solid #5d6d7e;
-            transition: all 0.2s;
-        }
-        .kaynak-etiket.aktif {
-            background: #2980b9;
-            color: white;
-            border-color: #3498db;
-        }
-        .kaynak-etiket input { display: none; }
+        .filtre-grup input::placeholder { color: #7f8c8d; }
         .filtre-btn {
             padding: 8px 20px;
             background: #3498db;
@@ -78,7 +57,6 @@
             font-size: 14px;
             font-weight: bold;
             cursor: pointer;
-            align-self: flex-end;
             transition: background 0.2s;
         }
         .filtre-btn:hover { background: #2980b9; }
@@ -94,26 +72,27 @@
             border-radius: 8px;
         }
         .ilan-karti { background: white; border-radius: 12px; padding: 16px; margin-bottom: 16px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); border-left: 5px solid #3498db; }
-        .ilan-baslik { font-size: 18px; font-weight: bold; color: #2c3e50; margin: 0 0 8px 0; }
-        .sirket-isim { font-size: 14px; color: #7f8c8d; margin-bottom: 12px; display: flex; align-items: center; gap: 5px; }
+        .ilan-baslik { font-size: 17px; font-weight: bold; color: #2c3e50; margin: 0 0 6px 0; }
+        .ilan-aciklama { font-size: 13px; color: #555; margin-bottom: 10px; line-height: 1.4; }
         .detaylar { display: flex; justify-content: space-between; align-items: center; font-size: 13px; flex-wrap: wrap; gap: 6px; }
-        .etiket { background-color: #e8f4f8; color: #2980b9; padding: 4px 8px; border-radius: 6px; font-weight: 600; }
+        .konum-badge { background-color: #e8f4f8; color: #2980b9; padding: 4px 8px; border-radius: 6px; font-weight: 600; font-size: 12px; }
         .kaynak-badge { background-color: #eafaf1; color: #27ae60; padding: 4px 8px; border-radius: 6px; font-weight: 600; font-size: 11px; }
         .tarih { color: #e74c3c; font-weight: bold; font-size: 12px; }
         .link-buton { display: block; text-align: center; background-color: #3498db; color: white; text-decoration: none; padding: 10px; border-radius: 8px; margin-top: 12px; font-weight: bold; transition: background 0.2s; }
         .link-buton:hover { background-color: #2980b9; }
+        .bos-mesaj { text-align: center; padding: 40px 20px; color: #7f8c8d; }
 
         @media (max-width: 480px) {
             .filtreler { flex-direction: column; align-items: stretch; }
-            .filtre-grup select { min-width: auto; width: 100%; }
+            .filtre-grup select, .filtre-grup input { min-width: auto; width: 100%; }
         }
     </style>
 </head>
 <body>
 
     <header>
-        <h1>Guncel Is Ilanlari</h1>
-        <p id="son-guncelleme">En guncel ilanlar araniyor...</p>
+        <h1>Is Ilani Arama</h1>
+        <p id="son-guncelleme">Ilanlar yukleniyor...</p>
     </header>
 
     <div class="filtreler" id="filtre-alani">
@@ -121,153 +100,156 @@
     </div>
 
     <div class="container" id="ilan-konteyner">
-        <p style="text-align:center;">Su an guncel ilanlar yukleniyor...</p>
+        <p style="text-align:center;">Ilanlar yukleniyor...</p>
     </div>
 
     <script>
         let tumIlanlar = [];
         let konfig = null;
 
-        // Konfig ve ilanları paralel yükle
         Promise.all([
             fetch('config.json').then(c => c.json()),
-            fetch('ilanlar.json').then(c => c.json())
+            fetch('ilanlar.json').then(c => c.json()).catch(function() { return []; })
         ])
-        .then(([konf, ilanlar]) => {
-            konfig = konf;
-            tumIlanlar = ilanlar;
-            filtreleriOlustur(konf);
-            ilanlariGoster(ilanlar);
+        .then(function(sonuclar) {
+            konfig = sonuclar[0];
+            tumIlanlar = sonuclar[1];
+            filtreleriOlustur(konfig);
+            ilanlariGoster(tumIlanlar);
         })
-        .catch(hata => {
+        .catch(function(hata) {
             console.error("Hata:", hata);
             document.getElementById('ilan-konteyner').innerHTML =
-                "<p style='text-align:center;'>Henuz yeni ilan bulunamadi veya taraniyor...</p>";
+                "<p class='bos-mesaj'>Veriler yuklenemedi. Lutfen sayfayi yenileyin.</p>";
         });
 
         function filtreleriOlustur(konf) {
-            const alan = document.getElementById('filtre-alani');
+            var alan = document.getElementById('filtre-alani');
 
-            // Pozisyon seçici
-            let pozOpsHtml = '';
-            konf.pozisyonlar.forEach(p => {
-                const secili = p === konf.secili_pozisyon ? 'selected' : '';
-                const gorunen = p.replace(/-/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
-                pozOpsHtml += '<option value="' + p + '" ' + secili + '>' + gorunen + '</option>';
+            // Pozisyon secici
+            var pozOps = '';
+            konf.pozisyonlar.forEach(function(p) {
+                var secili = p === konf.secili_pozisyon ? 'selected' : '';
+                var gorunen = p.replace(/-/g, ' ').replace(/\b\w/g, function(c) { return c.toUpperCase(); });
+                pozOps += '<option value="' + p + '" ' + secili + '>' + gorunen + '</option>';
             });
 
-            // Şehir seçici
-            let sehirOpsHtml = '';
-            konf.sehirler.forEach(s => {
-                const secili = s === konf.secili_sehir ? 'selected' : '';
-                const gorunen = s.replace(/\b\w/g, c => c.toUpperCase());
-                sehirOpsHtml += '<option value="' + s + '" ' + secili + '>' + gorunen + '</option>';
+            // Sehir secici
+            var sehirOps = '';
+            konf.sehirler.forEach(function(s) {
+                var secili = s === konf.secili_sehir ? 'selected' : '';
+                var gorunen = s.charAt(0).toUpperCase() + s.slice(1);
+                sehirOps += '<option value="' + s + '" ' + secili + '>' + gorunen + '</option>';
             });
 
-            // Kaynak checkbox'ları
-            let kaynakHtml = '';
-            konf.kaynaklar.forEach(k => {
-                const aktifClass = k.aktif ? 'aktif' : '';
-                const checked = k.aktif ? 'checked' : '';
-                kaynakHtml += '<label class="kaynak-etiket ' + aktifClass + '">' +
-                    '<input type="checkbox" value="' + k.ad + '" ' + checked + ' onchange="kaynakDegistir(this)">' +
-                    k.ad + '</label>';
+            // Kaynak filtreleme (mevcut ilanlardaki kaynaklardan)
+            var kaynaklar = [];
+            tumIlanlar.forEach(function(ilan) {
+                if (ilan.kaynak && kaynaklar.indexOf(ilan.kaynak) === -1) {
+                    kaynaklar.push(ilan.kaynak);
+                }
+            });
+            kaynaklar.sort();
+
+            var kaynakOps = '<option value="tumu">Tum Kaynaklar</option>';
+            kaynaklar.forEach(function(k) {
+                kaynakOps += '<option value="' + k + '">' + k + '</option>';
             });
 
             alan.innerHTML =
                 '<div class="filtre-grup">' +
                     '<label>Pozisyon</label>' +
-                    '<select id="pozisyon-sec">' + pozOpsHtml + '</select>' +
+                    '<select id="pozisyon-sec">' + pozOps + '</select>' +
                 '</div>' +
                 '<div class="filtre-grup">' +
                     '<label>Sehir</label>' +
-                    '<select id="sehir-sec">' + sehirOpsHtml + '</select>' +
+                    '<select id="sehir-sec">' + sehirOps + '</select>' +
                 '</div>' +
                 '<div class="filtre-grup">' +
-                    '<label>Kaynaklar</label>' +
-                    '<div class="kaynak-konteyner">' + kaynakHtml + '</div>' +
+                    '<label>Kaynak</label>' +
+                    '<select id="kaynak-sec">' + kaynakOps + '</select>' +
+                '</div>' +
+                '<div class="filtre-grup">' +
+                    '<label>Anahtar Kelime</label>' +
+                    '<input type="text" id="arama-kutusu" placeholder="Filtrele...">' +
                 '</div>' +
                 '<button class="filtre-btn" onclick="filtreUygula()">Filtrele</button>';
-        }
 
-        function kaynakDegistir(checkbox) {
-            const etiket = checkbox.parentElement;
-            if (checkbox.checked) {
-                etiket.classList.add('aktif');
-            } else {
-                etiket.classList.remove('aktif');
-            }
+            // Enter ile de filtre calissin
+            document.getElementById('arama-kutusu').addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') filtreUygula();
+            });
         }
 
         function filtreUygula() {
-            // Seçili kaynakları al
-            const seciliKaynaklar = [];
-            document.querySelectorAll('.kaynak-etiket input:checked').forEach(cb => {
-                seciliKaynaklar.push(cb.value);
+            var seciliKaynak = document.getElementById('kaynak-sec').value;
+            var aramaMetni = document.getElementById('arama-kutusu').value.toLowerCase().trim();
+
+            var filtrelenmis = tumIlanlar.filter(function(ilan) {
+                // Kaynak filtresi
+                if (seciliKaynak !== 'tumu' && ilan.kaynak !== seciliKaynak) {
+                    return false;
+                }
+                // Anahtar kelime filtresi
+                if (aramaMetni) {
+                    var metin = (ilan.baslik + ' ' + (ilan.aciklama || '') + ' ' + ilan.kaynak).toLowerCase();
+                    if (metin.indexOf(aramaMetni) === -1) {
+                        return false;
+                    }
+                }
+                return true;
             });
 
-            // İlanları filtrele (kaynak bazlı)
-            let filtrelenmis = tumIlanlar;
-            if (seciliKaynaklar.length > 0) {
-                filtrelenmis = tumIlanlar.filter(ilan =>
-                    seciliKaynaklar.includes(ilan.kaynak) || !ilan.kaynak
-                );
-            }
-
             ilanlariGoster(filtrelenmis);
-
-            // Bilgi mesajı
-            const pozisyon = document.getElementById('pozisyon-sec').value;
-            const sehir = document.getElementById('sehir-sec').value;
-            console.log('Filtre: pozisyon=' + pozisyon + ', sehir=' + sehir + ', kaynaklar=' + seciliKaynaklar.join(','));
         }
 
         function ilanlariGoster(ilanListesi) {
-            const konteyner = document.getElementById('ilan-konteyner');
+            var konteyner = document.getElementById('ilan-konteyner');
             konteyner.innerHTML = '';
 
             if (!ilanListesi || ilanListesi.length === 0) {
-                konteyner.innerHTML = "<p style='text-align:center;'>Secilen filtrelere uygun ilan bulunamadi.</p>";
+                konteyner.innerHTML = "<p class='bos-mesaj'>Ilan bulunamadi.</p>";
+                document.getElementById('son-guncelleme').innerText = 'Sonuc yok';
                 return;
             }
 
-            // Tarihe göre sırala (En yeni en üstte)
-            ilanListesi.sort((a, b) => new Date(b.tarih) - new Date(a.tarih));
+            // Tarihe gore sirala
+            ilanListesi.sort(function(a, b) { return new Date(b.tarih) - new Date(a.tarih); });
 
-            // Sonuç bilgisi
-            const bilgi = document.createElement('div');
+            // Sonuc bilgisi
+            var bilgi = document.createElement('div');
             bilgi.className = 'sonuc-bilgi';
             bilgi.textContent = 'Toplam ' + ilanListesi.length + ' ilan bulundu';
             konteyner.appendChild(bilgi);
 
-            ilanListesi.forEach(ilan => {
-                const kart = document.createElement('div');
+            ilanListesi.forEach(function(ilan) {
+                var kart = document.createElement('div');
                 kart.className = 'ilan-karti';
 
-                const kaynakBadge = ilan.kaynak ? '<span class="kaynak-badge">' + ilan.kaynak + '</span>' : '';
+                var aciklamaHtml = ilan.aciklama ? '<p class="ilan-aciklama">' + escapeHtml(ilan.aciklama) + '</p>' : '';
+                var kaynakBadge = ilan.kaynak ? '<span class="kaynak-badge">' + escapeHtml(ilan.kaynak) + '</span>' : '';
 
                 kart.innerHTML =
                     '<h2 class="ilan-baslik">' + escapeHtml(ilan.baslik) + '</h2>' +
-                    '<div class="sirket-isim">' + escapeHtml(ilan.sirket) + ' - ' + escapeHtml(ilan.konum) + '</div>' +
+                    aciklamaHtml +
                     '<div class="detaylar">' +
-                        '<span class="etiket">Guncel Ilan</span>' +
+                        '<span class="konum-badge">' + escapeHtml(ilan.konum) + '</span>' +
                         kaynakBadge +
                         '<span class="tarih">' + escapeHtml(ilan.tarih) + '</span>' +
                     '</div>' +
-                    '<a href="' + escapeHtml(ilan.link) + '" target="_blank" rel="noopener noreferrer" class="link-buton">Ilan Detayina Git</a>';
+                    '<a href="' + escapeHtml(ilan.link) + '" target="_blank" rel="noopener noreferrer" class="link-buton">Ilana Git</a>';
 
                 konteyner.appendChild(kart);
             });
 
-            const simdi = new Date();
+            var simdi = new Date();
             document.getElementById('son-guncelleme').innerText =
                 "Son Guncelleme: " + simdi.toLocaleTimeString('tr-TR', {hour: '2-digit', minute:'2-digit'});
         }
 
-        // XSS koruması için HTML escape
         function escapeHtml(metin) {
             if (!metin) return '';
-            const div = document.createElement('div');
+            var div = document.createElement('div');
             div.textContent = metin;
             return div.innerHTML;
         }
