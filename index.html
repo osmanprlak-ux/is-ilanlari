@@ -3,88 +3,174 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Guncel Is Ilanlari</title>
+    <title>Is Ilani Arama</title>
     <style>
-        * { box-sizing: border-box; }
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f4f6f9; margin: 0; padding: 0; color: #333; }
-        header { background-color: #2c3e50; color: white; padding: 20px; text-align: center; box-shadow: 0 4px 6px rgba(0,0,0,0.1); position: sticky; top: 0; z-index: 100; }
-        header h1 { margin: 0; font-size: 22px; }
-        header p { margin: 5px 0 0 0; font-size: 14px; color: #bdc3c7; }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f0f2f5; color: #333; }
+
+        header {
+            background: linear-gradient(135deg, #2c3e50, #34495e);
+            color: white;
+            padding: 18px 20px;
+            text-align: center;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        header h1 { font-size: 20px; font-weight: 700; }
+        header p { font-size: 13px; color: #95a5a6; margin-top: 4px; }
 
         .filtreler {
             background: #34495e;
-            padding: 15px 20px;
+            padding: 12px 16px;
             display: flex;
             flex-wrap: wrap;
-            gap: 10px;
+            gap: 8px;
             justify-content: center;
             align-items: flex-end;
+            border-bottom: 2px solid #2c3e50;
         }
         .filtre-grup {
             display: flex;
             flex-direction: column;
-            gap: 4px;
+            gap: 3px;
         }
         .filtre-grup label {
-            color: #bdc3c7;
-            font-size: 11px;
+            color: #95a5a6;
+            font-size: 10px;
             text-transform: uppercase;
             letter-spacing: 0.5px;
+            font-weight: 600;
         }
         .filtre-grup select,
         .filtre-grup input {
-            padding: 8px 12px;
+            padding: 7px 10px;
             border-radius: 6px;
             border: 1px solid #5d6d7e;
             background: #2c3e50;
             color: white;
-            font-size: 14px;
-            min-width: 160px;
-            cursor: pointer;
+            font-size: 13px;
+            min-width: 140px;
         }
         .filtre-grup select:focus,
         .filtre-grup input:focus {
             outline: none;
             border-color: #3498db;
+            box-shadow: 0 0 0 2px rgba(52,152,219,0.3);
         }
         .filtre-grup input::placeholder { color: #7f8c8d; }
         .filtre-btn {
-            padding: 8px 20px;
+            padding: 7px 18px;
             background: #3498db;
             color: white;
             border: none;
             border-radius: 6px;
-            font-size: 14px;
-            font-weight: bold;
+            font-size: 13px;
+            font-weight: 700;
             cursor: pointer;
             transition: background 0.2s;
         }
         .filtre-btn:hover { background: #2980b9; }
+        .filtre-btn:active { transform: scale(0.97); }
 
-        .container { padding: 20px; max-width: 600px; margin: 0 auto; }
+        .container { padding: 16px; max-width: 640px; margin: 0 auto; }
+
         .sonuc-bilgi {
             text-align: center;
             color: #7f8c8d;
             font-size: 13px;
-            margin-bottom: 15px;
+            margin-bottom: 12px;
             padding: 8px;
             background: white;
             border-radius: 8px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
         }
-        .ilan-karti { background: white; border-radius: 12px; padding: 16px; margin-bottom: 16px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); border-left: 5px solid #3498db; }
-        .ilan-baslik { font-size: 17px; font-weight: bold; color: #2c3e50; margin: 0 0 6px 0; }
-        .ilan-aciklama { font-size: 13px; color: #555; margin-bottom: 10px; line-height: 1.4; }
-        .detaylar { display: flex; justify-content: space-between; align-items: center; font-size: 13px; flex-wrap: wrap; gap: 6px; }
-        .konum-badge { background-color: #e8f4f8; color: #2980b9; padding: 4px 8px; border-radius: 6px; font-weight: 600; font-size: 12px; }
-        .kaynak-badge { background-color: #eafaf1; color: #27ae60; padding: 4px 8px; border-radius: 6px; font-weight: 600; font-size: 11px; }
-        .tarih { color: #e74c3c; font-weight: bold; font-size: 12px; }
-        .link-buton { display: block; text-align: center; background-color: #3498db; color: white; text-decoration: none; padding: 10px; border-radius: 8px; margin-top: 12px; font-weight: bold; transition: background 0.2s; }
-        .link-buton:hover { background-color: #2980b9; }
-        .bos-mesaj { text-align: center; padding: 40px 20px; color: #7f8c8d; }
+
+        .ilan-karti {
+            background: white;
+            border-radius: 10px;
+            padding: 14px 16px;
+            margin-bottom: 12px;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+            border-left: 4px solid #3498db;
+            transition: box-shadow 0.2s;
+        }
+        .ilan-karti:hover { box-shadow: 0 3px 12px rgba(0,0,0,0.1); }
+        .ilan-baslik { font-size: 16px; font-weight: 700; color: #2c3e50; margin-bottom: 5px; }
+        .ilan-aciklama {
+            font-size: 13px;
+            color: #555;
+            margin-bottom: 10px;
+            line-height: 1.5;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+        .detaylar {
+            display: flex;
+            justify-content: flex-start;
+            align-items: center;
+            font-size: 12px;
+            flex-wrap: wrap;
+            gap: 6px;
+        }
+        .konum-badge {
+            background-color: #e8f4f8;
+            color: #2980b9;
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-weight: 600;
+        }
+        .kaynak-badge {
+            background-color: #eafaf1;
+            color: #27ae60;
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-weight: 600;
+        }
+        .tarih {
+            color: #e74c3c;
+            font-weight: 600;
+            margin-left: auto;
+        }
+        .link-buton {
+            display: block;
+            text-align: center;
+            background: #3498db;
+            color: white;
+            text-decoration: none;
+            padding: 9px;
+            border-radius: 6px;
+            margin-top: 10px;
+            font-weight: 700;
+            font-size: 13px;
+            transition: background 0.2s;
+        }
+        .link-buton:hover { background: #2980b9; }
+        .bos-mesaj { text-align: center; padding: 40px 20px; color: #95a5a6; font-size: 15px; }
+
+        .yuklenme {
+            text-align: center;
+            padding: 60px 20px;
+            color: #95a5a6;
+        }
+        .yuklenme-spinner {
+            width: 32px;
+            height: 32px;
+            border: 3px solid #e0e0e0;
+            border-top-color: #3498db;
+            border-radius: 50%;
+            animation: don 0.8s linear infinite;
+            margin: 0 auto 12px;
+        }
+        @keyframes don { to { transform: rotate(360deg); } }
 
         @media (max-width: 480px) {
             .filtreler { flex-direction: column; align-items: stretch; }
             .filtre-grup select, .filtre-grup input { min-width: auto; width: 100%; }
+            .filtre-btn { width: 100%; }
         }
     </style>
 </head>
@@ -96,20 +182,23 @@
     </header>
 
     <div class="filtreler" id="filtre-alani">
-        <p style="color: #bdc3c7; text-align: center; width: 100%;">Filtreler yukleniyor...</p>
+        <p style="color: #95a5a6; text-align: center; width: 100%; font-size: 13px;">Filtreler yukleniyor...</p>
     </div>
 
     <div class="container" id="ilan-konteyner">
-        <p style="text-align:center;">Ilanlar yukleniyor...</p>
+        <div class="yuklenme">
+            <div class="yuklenme-spinner"></div>
+            <p>Ilanlar yukleniyor...</p>
+        </div>
     </div>
 
     <script>
-        let tumIlanlar = [];
-        let konfig = null;
+        var tumIlanlar = [];
+        var konfig = null;
 
         Promise.all([
-            fetch('config.json').then(c => c.json()),
-            fetch('ilanlar.json').then(c => c.json()).catch(function() { return []; })
+            fetch('config.json').then(function(c) { return c.json(); }),
+            fetch('ilanlar.json').then(function(c) { return c.json(); }).catch(function() { return []; })
         ])
         .then(function(sonuclar) {
             konfig = sonuclar[0];
@@ -120,29 +209,26 @@
         .catch(function(hata) {
             console.error("Hata:", hata);
             document.getElementById('ilan-konteyner').innerHTML =
-                "<p class='bos-mesaj'>Veriler yuklenemedi. Lutfen sayfayi yenileyin.</p>";
+                "<p class='bos-mesaj'>Veriler yuklenemedi. Sayfayi yenileyin.</p>";
         });
 
         function filtreleriOlustur(konf) {
             var alan = document.getElementById('filtre-alani');
 
-            // Pozisyon secici
-            var pozOps = '';
+            var pozOps = '<option value="tumu">Tum Pozisyonlar</option>';
             konf.pozisyonlar.forEach(function(p) {
                 var secili = p === konf.secili_pozisyon ? 'selected' : '';
                 var gorunen = p.replace(/-/g, ' ').replace(/\b\w/g, function(c) { return c.toUpperCase(); });
                 pozOps += '<option value="' + p + '" ' + secili + '>' + gorunen + '</option>';
             });
 
-            // Sehir secici
-            var sehirOps = '';
+            var sehirOps = '<option value="tumu">Tum Sehirler</option>';
             konf.sehirler.forEach(function(s) {
                 var secili = s === konf.secili_sehir ? 'selected' : '';
                 var gorunen = s.charAt(0).toUpperCase() + s.slice(1);
                 sehirOps += '<option value="' + s + '" ' + secili + '>' + gorunen + '</option>';
             });
 
-            // Kaynak filtreleme (mevcut ilanlardaki kaynaklardan)
             var kaynaklar = [];
             tumIlanlar.forEach(function(ilan) {
                 if (ilan.kaynak && kaynaklar.indexOf(ilan.kaynak) === -1) {
@@ -171,11 +257,10 @@
                 '</div>' +
                 '<div class="filtre-grup">' +
                     '<label>Anahtar Kelime</label>' +
-                    '<input type="text" id="arama-kutusu" placeholder="Filtrele...">' +
+                    '<input type="text" id="arama-kutusu" placeholder="Ara...">' +
                 '</div>' +
                 '<button class="filtre-btn" onclick="filtreUygula()">Filtrele</button>';
 
-            // Enter ile de filtre calissin
             document.getElementById('arama-kutusu').addEventListener('keypress', function(e) {
                 if (e.key === 'Enter') filtreUygula();
             });
@@ -183,20 +268,30 @@
 
         function filtreUygula() {
             var seciliKaynak = document.getElementById('kaynak-sec').value;
+            var seciliPozisyon = document.getElementById('pozisyon-sec').value;
+            var seciliSehir = document.getElementById('sehir-sec').value;
             var aramaMetni = document.getElementById('arama-kutusu').value.toLowerCase().trim();
 
             var filtrelenmis = tumIlanlar.filter(function(ilan) {
-                // Kaynak filtresi
-                if (seciliKaynak !== 'tumu' && ilan.kaynak !== seciliKaynak) {
-                    return false;
-                }
-                // Anahtar kelime filtresi
+                if (seciliKaynak !== 'tumu' && ilan.kaynak !== seciliKaynak) return false;
+
                 if (aramaMetni) {
-                    var metin = (ilan.baslik + ' ' + (ilan.aciklama || '') + ' ' + ilan.kaynak).toLowerCase();
-                    if (metin.indexOf(aramaMetni) === -1) {
-                        return false;
-                    }
+                    var metin = ((ilan.baslik || '') + ' ' + (ilan.aciklama || '') + ' ' + (ilan.kaynak || '') + ' ' + (ilan.konum || '')).toLowerCase();
+                    if (metin.indexOf(aramaMetni) === -1) return false;
                 }
+
+                if (seciliPozisyon !== 'tumu') {
+                    var pozMetin = seciliPozisyon.replace(/-/g, ' ').toLowerCase();
+                    var ilanMetin = ((ilan.baslik || '') + ' ' + (ilan.aciklama || '')).toLowerCase();
+                    if (ilanMetin.indexOf(pozMetin) === -1) return false;
+                }
+
+                if (seciliSehir !== 'tumu') {
+                    var sehirMetin = seciliSehir.toLowerCase();
+                    var konumMetin = ((ilan.konum || '') + ' ' + (ilan.baslik || '') + ' ' + (ilan.aciklama || '')).toLowerCase();
+                    if (konumMetin.indexOf(sehirMetin) === -1) return false;
+                }
+
                 return true;
             });
 
@@ -208,18 +303,16 @@
             konteyner.innerHTML = '';
 
             if (!ilanListesi || ilanListesi.length === 0) {
-                konteyner.innerHTML = "<p class='bos-mesaj'>Ilan bulunamadi.</p>";
+                konteyner.innerHTML = "<p class='bos-mesaj'>Secilen filtrelere uygun ilan bulunamadi.</p>";
                 document.getElementById('son-guncelleme').innerText = 'Sonuc yok';
                 return;
             }
 
-            // Tarihe gore sirala
             ilanListesi.sort(function(a, b) { return new Date(b.tarih) - new Date(a.tarih); });
 
-            // Sonuc bilgisi
             var bilgi = document.createElement('div');
             bilgi.className = 'sonuc-bilgi';
-            bilgi.textContent = 'Toplam ' + ilanListesi.length + ' ilan bulundu';
+            bilgi.textContent = ilanListesi.length + ' ilan bulundu';
             konteyner.appendChild(bilgi);
 
             ilanListesi.forEach(function(ilan) {
@@ -228,12 +321,13 @@
 
                 var aciklamaHtml = ilan.aciklama ? '<p class="ilan-aciklama">' + escapeHtml(ilan.aciklama) + '</p>' : '';
                 var kaynakBadge = ilan.kaynak ? '<span class="kaynak-badge">' + escapeHtml(ilan.kaynak) + '</span>' : '';
+                var konumBadge = ilan.konum ? '<span class="konum-badge">' + escapeHtml(ilan.konum) + '</span>' : '';
 
                 kart.innerHTML =
                     '<h2 class="ilan-baslik">' + escapeHtml(ilan.baslik) + '</h2>' +
                     aciklamaHtml +
                     '<div class="detaylar">' +
-                        '<span class="konum-badge">' + escapeHtml(ilan.konum) + '</span>' +
+                        konumBadge +
                         kaynakBadge +
                         '<span class="tarih">' + escapeHtml(ilan.tarih) + '</span>' +
                     '</div>' +
@@ -242,9 +336,8 @@
                 konteyner.appendChild(kart);
             });
 
-            var simdi = new Date();
             document.getElementById('son-guncelleme').innerText =
-                "Son Guncelleme: " + simdi.toLocaleTimeString('tr-TR', {hour: '2-digit', minute:'2-digit'});
+                ilanListesi.length + ' ilan | Son guncelleme: ' + new Date().toLocaleTimeString('tr-TR', {hour: '2-digit', minute:'2-digit'});
         }
 
         function escapeHtml(metin) {
