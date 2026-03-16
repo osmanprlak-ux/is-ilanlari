@@ -21,7 +21,7 @@ jobs:
           python-version: '3.12'
 
       - name: Gerekli Araclari Yukle
-        run: pip install ddgs
+        run: pip install ddgs requests beautifulsoup4
 
       - name: Ilanlari Tara
         run: python scraper.py

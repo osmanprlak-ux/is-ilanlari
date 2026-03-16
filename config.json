@@ -8,9 +8,12 @@
         "garson",
         "barmen",
         "resepsiyon",
-        "komedyen",
-        "bulasikcii",
-        "kat-hizmetleri"
+        "komisyoncu",
+        "bulasikci",
+        "kat-hizmetleri",
+        "chef-de-partie",
+        "sous-chef",
+        "executive-chef"
     ],
     "sehirler": [
         "antalya",
@@ -22,7 +25,12 @@
         "bursa",
         "trabzon",
         "adana",
-        "mersin"
+        "mersin",
+        "fethiye",
+        "kemer",
+        "belek",
+        "alanya",
+        "side"
     ],
     "secili_pozisyon": "soguk-sef",
     "secili_sehir": "antalya"
